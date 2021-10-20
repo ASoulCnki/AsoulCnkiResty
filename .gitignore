@@ -1,5 +1,5 @@
 web/logs/*
 web/*temp/
-web/dist/
+web/dist/*
 
 .vscode/
