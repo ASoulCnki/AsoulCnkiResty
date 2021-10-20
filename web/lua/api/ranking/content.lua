@@ -1,25 +1,27 @@
 local generic = require "lua.hooks.useGeneric"
 local args = require "lua.hooks.useArgs"
-local http = require "resty.http"
+local requests = require "resty.requests"
+local url = require "net.url"
 local json = require "cjson"
-local httpc = http.new()
 
-local function requests(params)
+local function req(params)
     -- Bug: requests(): network is unreachable
-
-    local res, err = httpc:request_uri("https://asoulcnki.asia/v1/api/ranking/", {
-        method = "GET",
-        query = params,
-        ssl_verify = false
+    local u = url.parse("https://asoulcnki.asia/v1/api/ranking/")
+    u:setQuery(params)
+    local r, err = requests.get(u, {
+        headers = {
+            ['user-agent'] = "asoulcnki-resty",
+            timeouts = {16000}
+        }
     })
-    if res then
-        return res:read_body()
-    else
-        if err then
-            ngx.log(ngx.ERR, err)
-        end
+
+    if not r then
+        ngx.log(ngx.ERR, err)
         return '{"code":500, "message":"Interval Server Error", "data":[]}'
     end
+
+    ngx.ctx.cachable = true
+    return r:body()
 end
 
 local cache = ngx.shared.ranking_cache
@@ -68,8 +70,8 @@ else
     end
     ngx.ctx.cached = false
     ngx.ctx.cache_key = cache_key
-    ngx.ctx.res = requests(keys)
+    ngx.ctx.res = req(keys)
 end
 
-ngx.say(ngx.ctx.res or 'nil')
+ngx.say(ngx.ctx.res)
 ngx.eof()
