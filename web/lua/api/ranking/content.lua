@@ -2,10 +2,9 @@ local generic = require "lua.hooks.useGeneric"
 local args = require "lua.hooks.useArgs"
 local requests = require "resty.requests"
 local url = require "net.url"
-local json = require "cjson"
+local error = require "hooks.useError"
 
 local function req(params)
-    -- Bug: requests(): network is unreachable
     local u = url.parse("https://asoulcnki.asia/v1/api/ranking/")
     u:setQuery(params)
     local r, err = requests.get(u, {
@@ -16,8 +15,7 @@ local function req(params)
     })
 
     if not r then
-        ngx.log(ngx.ERR, err)
-        return '{"code":500, "message":"Interval Server Error", "data":[]}'
+        error.empty_data()
     end
 
     ngx.ctx.cachable = true

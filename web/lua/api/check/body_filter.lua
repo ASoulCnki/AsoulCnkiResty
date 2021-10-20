@@ -6,6 +6,6 @@ if ngx.ctx.cached then
 end
 
 if ngx.ctx.cachable then
-    local cache = ngx.shared.ranking_cache
+    local cache = ngx.shared.check_cache
     cache:set(ngx.ctx.cache_key, ngx.ctx.res, expire)
 end
