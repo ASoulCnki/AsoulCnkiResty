@@ -3,11 +3,13 @@ local info = require "hooks.useInfo"
 
 local _M = {}
 
+-- return empty data when upstream unreachable
 function _M.empty_data()
     ngx.say('{"code":500, "message":"Interval Server Error", "data":[]}')
     ngx.exit(ngx.HTTP_OK)
 end
 
+-- return hint when api call wrong way
 function _M.lint(message)
     local data = {
         info = info.get_client_info(),
