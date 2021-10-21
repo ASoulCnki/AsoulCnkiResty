@@ -15,7 +15,7 @@ function _M.lint(message)
         message = message or "Error: Call API in Wrong Way",
         hint = {
             info = "Read API Doc on GitHub",
-            url = [[https://github.com/ASoulCnki/ASoulCnkiBackend/blob/master/api.md]]
+            url = [[https://github.com/ASoulCnki/.github/tree/master/api]]
         },
         data = ngx.null
     }
