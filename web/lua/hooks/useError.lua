@@ -13,7 +13,7 @@ function _M.lint(message)
         info = info.get_client_info(),
         code = -412,
         message = message or "Error: Call API in Wrong Way",
-        lint = {
+        hint = {
             info = "Read API Doc on GitHub",
             url = [[https://github.com/ASoulCnki/ASoulCnkiBackend/blob/master/api.md]]
         },
