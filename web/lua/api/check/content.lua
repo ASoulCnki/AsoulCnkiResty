@@ -1,3 +1,4 @@
+local ngx = require 'ngx'
 local json = require "cjson"
 local args = require "hooks.useArgs"
 local request = require "resty.requests"
@@ -10,8 +11,6 @@ local config_check = config.api.check
 local config_base_url = config.requests.base_url
 local error_lint = error.lint
 local error_empty = error.empty_data
-
-local cache_key
 
 local function is_valid_method()
     local method = ngx.req.get_method()
@@ -27,12 +26,11 @@ local function req(body)
     }
     local api_check = config_base_url .. '/check'
 
-    local res, err = request.post(api_check, opts)
+    local res, _ = request.post(api_check, opts)
 
     if not res then
         error_empty()
     else
-        ngx.ctx.cache_key = cache_key
         ngx.ctx.cachable = true
         return res:body()
     end
@@ -44,7 +42,7 @@ end
 
 local body_data = args.post_data()
 
-local data, err = json.decode(body_data)
+local data, _ = json.decode(body_data)
 if not data then
     error_lint("Error: Post data should be JSON")
 end
@@ -70,10 +68,10 @@ end
 
 local cache_key = ngx.md5(data.text)
 
-local data, err = cache:get(cache_key)
+local cache_data, err = cache:get(cache_key)
 
-if data then
-    ngx.say(data)
+if cache_data then
+    ngx.say(cache_data)
     ngx.exit(ngx.HTTP_OK)
 else
     if err then

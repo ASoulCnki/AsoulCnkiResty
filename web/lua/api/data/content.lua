@@ -1,4 +1,5 @@
 local json = require "cjson"
+local ngx = require 'ngx'
 local args = require "hooks.useArgs"
 local config = require "config"
 
@@ -11,12 +12,15 @@ local function is_valid()
     local method = ngx.req.get_method()
 
     local str, err = ngx.re.match(uri, "^/v1/api/data/(" .. table.concat(vaild_route, "|") .. ")")
+    if err then
+        return false
+    end
     return method == "POST" and str
 end
 
 local function has_params()
     local raw_body = args.post_data()
-    local data, err = json.decode(raw_body)
+    local data, _ = json.decode(raw_body)
 
     if data then
         return data and data.secure_key and data.secure_key == config_data_key
