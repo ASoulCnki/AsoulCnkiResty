@@ -3,9 +3,13 @@ local args = require "lua.hooks.useArgs"
 local requests = require "resty.requests"
 local url = require "net.url"
 local error = require "hooks.useError"
+local config = require "config"
+
+local config_base_url = config.requests.base_url
+local expire = config.expire
 
 local function req(params)
-    local u = url.parse("https://asoulcnki.asia/v1/api/ranking/")
+    local u = url.parse(config_base_url .. "/ranking/")
     u:setQuery(params)
     local r, err = requests.get(u, {
         headers = {
@@ -44,7 +48,7 @@ end
 
 if not (keys and condi) then
     -- return error
-    ngx.exit(ngx.HTTP_NOT_FOUND)
+    error.lint()
 end
 
 if not cache then
@@ -73,3 +77,8 @@ end
 
 ngx.say(ngx.ctx.res)
 ngx.eof()
+
+if ngx.ctx.cache_key then
+    cache:set(ngx.ctx.cache_key, ngx.ctx.res, expire)
+    ngx.log(ngx.ERR, '[cache] new check cache, ID: ', ngx.ctx.cache_key)
+end

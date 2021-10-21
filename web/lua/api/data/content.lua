@@ -1,4 +1,8 @@
 local json = require "cjson"
+local args = require "hooks.useArgs"
+local config = require "config"
+
+local config_data_key = config.api.data.secure_key
 
 local function is_valid()
     local vaild_route = {'pull', 'train', 'reset'}
@@ -11,13 +15,14 @@ local function is_valid()
 end
 
 local function has_params()
-    ngx.req.read_body()
-    local raw_body = ngx.req.get_body_data()
-    local data
-    pcall(function(s)
-        data = json.decode(s)
-    end, raw_body)
-    return data and data.secure_key and #data.secure_key > 10
+    local raw_body = args.post_data()
+    local data, err = json.decode(raw_body)
+
+    if data then
+        return data and data.secure_key and data.secure_key == config_data_key
+    else
+        return false
+    end
 end
 
 if not (is_valid() and has_params()) then
