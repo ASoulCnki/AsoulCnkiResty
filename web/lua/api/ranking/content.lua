@@ -23,11 +23,11 @@ local function req(params)
 
     return function()
         local r, err = requests.get(u, opts)
-        if not r then
-            error.empty_data()
+        if r then
+            ngx.ctx.cachable = true
+            return r:body()
         end
-        ngx.ctx.cachable = true
-        return r:body()
+        return nil
     end
 end
 
