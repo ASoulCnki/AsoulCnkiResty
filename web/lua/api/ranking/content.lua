@@ -1,29 +1,34 @@
 local generic = require "lua.hooks.useGeneric"
-local args = require "lua.hooks.useArgs"
+local args = require "hooks.useArgs"
 local requests = require "resty.requests"
 local url = require "net.url"
 local error = require "hooks.useError"
+local retry = require "hooks.useRetry"
 local config = require "config"
 
 local config_base_url = config.requests.base_url
 local expire = config.expire
+local empty_data = error.empty_data
 
 local function req(params)
-    local u = url.parse(config_base_url .. "/ranking/")
-    u:setQuery(params)
-    local r, err = requests.get(u, {
+    local opts = {
         headers = {
             ['user-agent'] = "asoulcnki-resty",
-            timeouts = {16000}
+            timeouts = {16000, 16000, 16000}
         }
-    })
+    }
 
-    if not r then
-        error.empty_data()
+    local u = url.parse(config_base_url .. "/ranking/")
+    u:setQuery(params)
+
+    return function()
+        local r, err = requests.get(u, opts)
+        if not r then
+            error.empty_data()
+        end
+        ngx.ctx.cachable = true
+        return r:body()
     end
-
-    ngx.ctx.cachable = true
-    return r:body()
 end
 
 local cache = ngx.shared.ranking_cache
@@ -72,7 +77,7 @@ else
     end
     ngx.ctx.cached = false
     ngx.ctx.cache_key = cache_key
-    ngx.ctx.res = req(keys)
+    ngx.ctx.res = retry.retry(req(keys), 3, empty_data)
 end
 
 ngx.say(ngx.ctx.res)

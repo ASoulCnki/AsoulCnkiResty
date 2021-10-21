@@ -8,7 +8,8 @@ function _M.get_client_info()
     local data = {
         ip = headers['ali-cdn-real-ip'] or ngx.var.remote_addr,
         user_agent = headers['user-agent'] or '',
-        uri = ngx.var.uri
+        uri = ngx.var.uri,
+        time = ngx.now() * 1000
     }
     return data
 end

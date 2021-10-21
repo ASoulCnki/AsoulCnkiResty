@@ -5,7 +5,7 @@ _M.requests = {
 }
 
 _M.cache = {
-    expire = 4000
+    expire = 5400
 }
 
 _M.api = {

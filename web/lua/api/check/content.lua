@@ -5,6 +5,7 @@ local request = require "resty.requests"
 local config = require "config"
 local utf8 = require "lua-utf8"
 local error = require "hooks.useError"
+local retry = require "hooks.useRetry"
 
 local expire = config.expire
 local config_check = config.api.check
@@ -21,18 +22,22 @@ local function req(body)
     local opts = {
         body = body,
         headers = {
-            ["content-type"] = "application/json"
-        }
+            ["content-type"] = "application/json",
+            ["user-agent"] = "asoulcnki-resty"
+        },
+        timeouts = {16000, 16000, 16000}
     }
+
     local api_check = config_base_url .. '/check'
 
-    local res, _ = request.post(api_check, opts)
+    return function()
+        local res, _ = request.post(api_check, opts)
 
-    if not res then
-        error_empty()
-    else
-        ngx.ctx.cachable = true
-        return res:body()
+        if res then
+            ngx.ctx.cachable = true
+            return res:body()
+        end
+        return nil
     end
 end
 
@@ -77,7 +82,7 @@ else
     if err then
         ngx.log(ngx.ERR, err)
     end
-    ngx.ctx.res = req(body_data)
+    ngx.ctx.res = retry.retry(req(body_data), 3, error_empty)
     ngx.ctx.cache_key = cache_key
 end
 
