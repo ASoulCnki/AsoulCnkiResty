@@ -2,8 +2,9 @@ local json = require "cjson"
 local ngx = require 'ngx'
 local args = require "hooks.useArgs"
 local config = require "config"
+local utf8 = require "lua-utf8"
 
-local config_data_key = config.api.data.secure_key
+local config_data_key_len = config.api.data.secure_key_len
 
 local function is_valid()
     local vaild_route = {'pull', 'train', 'reset'}
@@ -23,7 +24,7 @@ local function has_params()
     local data, _ = json.decode(raw_body)
 
     if data then
-        return data and data.secure_key and data.secure_key == config_data_key
+        return data and data.secure_key and utf8.len(data.secure_key) >= config_data_key_len
     else
         return false
     end

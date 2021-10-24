@@ -43,9 +43,17 @@ local keys = generic.pick(params, require_key)
 -- timeRangeMode >= 0
 -- pageNum >= 1
 -- 10 <= pageSize <= 20
-local condi = (keys and keys.sortMode and tonumber(keys.sortMode) >= 0 and keys.timeRangeMode and
-                  tonumber(keys.timeRangeMode) >= 0 and keys.pageSize and tonumber(keys.pageSize) >= 10 and
-                  tonumber(keys.pageSize) <= 20 and keys.pageNum and tonumber(keys.pageNum) > 0)
+
+local t = function(s)
+    pcall(function(s)
+        data = tonumber(s)
+    end, s)
+    return data or -1
+end
+
+local condi =
+    (keys and keys.sortMode and t(keys.sortMode) >= 0 and keys.timeRangeMode and t(keys.timeRangeMode) >= 0 and
+        keys.pageSize and t(keys.pageSize) >= 10 and t(keys.pageSize) <= 20 and keys.pageNum and t(keys.pageNum) > 0)
 
 if condi and (#(keys.ids or '') > 100 or #(keys.keys or '') > 100) then
     condi = false
