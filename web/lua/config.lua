@@ -17,7 +17,7 @@ _M.api = {
         secret = "114514"
     },
     data = {
-        secure_key = "114514"
+        secure_key_len = 8
     }
 }
 
