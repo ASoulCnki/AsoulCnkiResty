@@ -7,7 +7,7 @@ local utf8 = require "lua-utf8"
 local config_data_key_len = config.api.data.secure_key_len
 
 local function is_valid()
-    local vaild_route = {'pull', 'train', 'reset'}
+    local vaild_route = {'pull', 'train', 'reset', 'checkpoint'}
 
     local uri = ngx.var.uri
     local method = ngx.req.get_method()
