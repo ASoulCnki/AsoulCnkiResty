@@ -33,7 +33,7 @@ end
 
 local cache = ngx.shared.ranking_cache
 
-local require_key = {'sortMode', 'timeRangeMode', 'pageSize', 'pageNum', 'ids', 'keys'}
+local require_key = {'sortMode', 'timeRangeMode', 'pageSize', 'pageNum', 'ids', 'keywords'}
 
 local params = args.get_args()
 local keys = generic.pick(params, require_key)
@@ -55,7 +55,7 @@ local condi =
     (keys and keys.sortMode and t(keys.sortMode) >= 0 and keys.timeRangeMode and t(keys.timeRangeMode) >= 0 and
         keys.pageSize and t(keys.pageSize) >= 10 and t(keys.pageSize) <= 20 and keys.pageNum and t(keys.pageNum) > 0)
 
-if condi and (#(keys.ids or '') > 100 or #(keys.keys or '') > 100) then
+if condi and (#(keys.ids or '') > 100 or #(keys.keywords or '') > 100) then
     condi = false
 end
 
@@ -93,5 +93,5 @@ ngx.eof()
 
 if ngx.ctx.cache_key then
     cache:set(ngx.ctx.cache_key, ngx.ctx.res, expire)
-    ngx.log(ngx.ERR, '[cache] new check cache, ID: ', ngx.ctx.cache_key)
+    ngx.log(ngx.ERR, '[cache] new ranking cache, ID: ', ngx.ctx.cache_key)
 end
