@@ -7,7 +7,7 @@ local utf8 = require "lua-utf8"
 local error = require "hooks.useError"
 local retry = require "hooks.useRetry"
 
-local expire = config.expire
+local expire = config.cache.expire
 local config_check = config.api.check
 local config_base_url = config.requests.base_url
 local error_lint = error.lint

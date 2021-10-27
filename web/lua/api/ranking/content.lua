@@ -7,7 +7,7 @@ local retry = require "hooks.useRetry"
 local config = require "config"
 
 local config_base_url = config.requests.base_url
-local expire = config.expire
+local expire = config.cache.expire
 local empty_data = error.empty_data
 
 local function req(params)
