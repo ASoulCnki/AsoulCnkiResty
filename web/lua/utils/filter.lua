@@ -10,9 +10,9 @@ local function decodeJSON(response)
     return result
 end
 
-local keywords = {}
+local keywords = {'八晚饭', '八碗饭', 'a畜', 'a÷'}
 
-local function codeGenKeyWordRe(keywords)
+local function codeGenKeyWordRe()
     if type(keywords) == "string" then
         keywords = {keywords}
     end
@@ -24,9 +24,9 @@ local function codeGenKeyWordRe(keywords)
     return '(' .. table.concat(keywords, "|") .. ')'
 end
 
-local keywordsRegex = codeGenKeyWordRe(keywords)
+local keywordsRegex = codeGenKeyWordRe()
 
-local isContentHasKeyword = function(content, keywordsRegex)
+local isContentHasKeyword = function(content)
     if content == nil or content == '' then
         return false
     end
@@ -37,14 +37,14 @@ end
 local function filterByKeyword(listStr)
     local list = decodeJSON(listStr)
 
-    if not list or #list == 0 then
+    if not list or list == ngx.null or #list == 0 then
         return {}
     end
 
     local result = table.new(#list, 0)
 
     for _, v in ipairs(list) do
-        if not isContentHasKeyword(v['content'], keywordsRegex) then
+        if not isContentHasKeyword(v['content']) then
             table.insert(result, v)
         end
     end
@@ -59,7 +59,7 @@ local function filterResult(res)
 
     res = decodeJSON(res)
 
-    if res and res.data and res.data.replies and res.data.replies ~= ngx.null then
+    if res and res.data and res.data.replies then
         local listStr = json.encode(res.data.replies)
         res.data.replies = filterByKeyword(listStr)
     end
