@@ -1,3 +1,4 @@
+local ngx = require "ngx"
 local generic = require "lua.hooks.useGeneric"
 local args = require "hooks.useArgs"
 local requests = require "resty.requests"
@@ -5,6 +6,7 @@ local url = require "net.url"
 local error = require "hooks.useError"
 local retry = require "hooks.useRetry"
 local config = require "config"
+local filter = require "utils.filter"
 
 local config_base_url = config.requests.base_url
 local expire = config.cache.expire
@@ -13,8 +15,8 @@ local empty_data = error.empty_data
 local function req(params)
     local opts = {
         headers = {
-            ['user-agent'] = "asoulcnki-resty",
-            timeouts = {16000, 16000, 16000}
+            ['user-agent'] = "asoulcnki-resty"
+            -- timeouts = {16000, 16000, 16000}
         }
     }
 
@@ -68,7 +70,7 @@ if not cache then
     return
 end
 
-local cache_table = {keys.sortMode, keys.timeRangeMode, keys.pageSize, keys.pageNum, keys.ids or 0, keys.keys or 0}
+local cache_table = {keys.sortMode, keys.timeRangeMode, keys.pageSize, keys.pageNum, keys.ids or 0, keys.keywords or 0}
 
 local cache_key = table.concat(cache_table, '-')
 
@@ -86,6 +88,7 @@ else
     ngx.ctx.cached = false
     ngx.ctx.cache_key = cache_key
     ngx.ctx.res = retry.retry(req(keys), 3, empty_data)
+    ngx.ctx.res = filter.filterResult(ngx.ctx.res)
 end
 
 ngx.say(ngx.ctx.res)
