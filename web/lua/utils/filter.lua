@@ -1,4 +1,6 @@
+local ngx = require("ngx")
 local json = require("cjson")
+json.encode_empty_table_as_object(false)
 
 local function decodeJSON(response)
     local status, result = pcall(json.decode, response)
@@ -8,16 +10,15 @@ local function decodeJSON(response)
     return result
 end
 
--- keywords
 local keywords = {}
 
 local function codeGenKeyWordRe(keywords)
-    if #keywords == 0 then
-        return nil
-    end
-
     if type(keywords) == "string" then
         keywords = {keywords}
+    end
+
+    if #keywords == 0 then
+        return nil
     end
 
     return '(' .. table.concat(keywords, "|") .. ')'
@@ -41,6 +42,7 @@ local function filterByKeyword(listStr)
     end
 
     local result = table.new(#list, 0)
+
     for _, v in ipairs(list) do
         if not isContentHasKeyword(v['content'], keywordsRegex) then
             table.insert(result, v)
@@ -57,7 +59,7 @@ local function filterResult(res)
 
     res = decodeJSON(res)
 
-    if res and res.data and res.data.replies then
+    if res and res.data and res.data.replies and res.data.replies ~= ngx.null then
         local listStr = json.encode(res.data.replies)
         res.data.replies = filterByKeyword(listStr)
     end
